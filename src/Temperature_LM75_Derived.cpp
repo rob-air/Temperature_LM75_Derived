@@ -68,6 +68,14 @@ int16_t Temperature_LM75_Derived::readIntegerTemperatureRegister(uint8_t registe
   // Finished reading the register data.
   bus->endTransmission();
 
+  // Next line is a dirty hack used as a makeshift error-handling method.
+  // When sensor is unexpectedly unplugged during operation, the returned value is -0.13°C
+  // which is inside the range of the sensor and a common temperature. This line replaces that
+  // with a value of -128°C which is obviously very improbable and outside the operating
+  // range of the sensor, making it possible to detect and handle from outside the library.
+  // Tested only with NXP LM75A
+  if (t==65535) t = 32768;
+  
   // Mask out unused/reserved bit from the full 16-bit register.
   t &= resolution_mask;
 
